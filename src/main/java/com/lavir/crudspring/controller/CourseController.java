@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import com.lavir.crudspring.model.Course;
 import com.lavir.crudspring.repository.CourseRepository;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -46,6 +48,30 @@ public class CourseController {
     return courseRepository.save(course);
     // return
     // ResponseEntity.status(HttpStatus.CREATED).body(courseRepository.save(course));
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<Course> update(@PathVariable Long id, @RequestBody Course course) {
+    return courseRepository.findById(id)
+        .map(data -> {
+          data.setName(course.getName());
+          data.setCategory(course.getCategory());
+
+          Course updated = courseRepository.save(data);
+
+          return ResponseEntity.ok().body(updated);
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> delete(@PathVariable Long id) {
+    return courseRepository.findById(id)
+        .map(data -> {
+          courseRepository.deleteById(id);
+          return ResponseEntity.noContent().<Void>build();
+        })
+        .orElse(ResponseEntity.notFound().build());
   }
 
 }
